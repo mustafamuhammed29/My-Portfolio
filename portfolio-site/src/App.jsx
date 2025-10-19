@@ -1,15 +1,15 @@
 // src/App.jsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { db } from './firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import Navbar from './components/Navbar';
 import Header from './components/Header';
-import About from './components/About';
-import Experience from './components/Experience';
-import Skills from './components/Skills';
-import Projects from './components/Projects';
-import Contact from './components/Contact';
+const About = lazy(() => import('./components/About'));
+const Experience = lazy(() => import('./components/Experience'));
+const Skills = lazy(() => import('./components/Skills'));
+const Projects = lazy(() => import('./components/Projects'));
+const Contact = lazy(() => import('./components/Contact'));
 import Footer from './components/Footer';
 import ExplosionAnimation from './components/ExplosionAnimation';
 import GeminiPlanner from './components/GeminiPlanner';
@@ -88,12 +88,14 @@ function App() {
         <Navbar settings={settings} />
         <main>
           <Header />
-          {settings.showAbout && <About />}
-          {settings.showExperience && <Experience />}
-          {settings.showSkills && <Skills />}
-          {settings.showProjects && <Projects />}
-          {settings.showPlanner && <GeminiPlanner />}
-          {settings.showContact && <Contact />}
+          <Suspense fallback={<div>Loading...</div>}>
+            {settings.showAbout && <About />}
+            {settings.showExperience && <Experience />}
+            {settings.showSkills && <Skills />}
+            {settings.showProjects && <Projects />}
+            {settings.showPlanner && <GeminiPlanner />}
+            {settings.showContact && <Contact />}
+          </Suspense>
         </main>
         <Footer />
       </div>

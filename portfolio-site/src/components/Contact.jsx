@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Mail, MapPin, Phone, Github, Linkedin, Twitter, Send, User, AtSign, MessageSquare, Sparkles } from 'lucide-react';
+import { Mail, MapPin, Phone, Github, Linkedin, Twitter, Send, User, AtSign, MessageSquare, Sparkles, X } from 'lucide-react';
 import { db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -81,7 +81,7 @@ function Contact() {
     const socialLinks = [
         { icon: Github, link: settings.github || '#', color: 'bg-gray-800/50 hover:bg-gray-700 hover:text-white' },
         { icon: Linkedin, link: settings.linkedin || '#', color: 'bg-gray-800/50 hover:bg-blue-600 hover:text-white' },
-        { icon: Twitter, link: settings.twitter || '#', color: 'bg-gray-800/50 hover:bg-cyan-500 hover:text-white' },
+        { icon: X, link: settings.twitter || '#', color: 'bg-gray-800/50 hover:bg-cyan-500 hover:text-white' },
     ];
 
 
