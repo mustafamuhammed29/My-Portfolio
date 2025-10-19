@@ -1,14 +1,37 @@
-import { useState } from 'react';
+// src/components/Contact.jsx
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Mail, MapPin, Phone, Github, Linkedin, Twitter, Send, User, AtSign, MessageSquare, Sparkles } from 'lucide-react';
+import { db } from '../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 function Contact() {
     const { t, i18n } = useTranslation();
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [formStatus, setFormStatus] = useState({ submitting: false, success: false, error: false });
     const [focusedField, setFocusedField] = useState(null);
+    const [settings, setSettings] = useState({});
     const isRtl = i18n.language === 'ar';
+
+    // 1. جلب الإعدادات العامة من Firestore
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const docRef = doc(db, "settings", "generalSettings");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setSettings(docSnap.data());
+                } else {
+                    setSettings({});
+                }
+            } catch (error) {
+                console.error("Error fetching general settings:", error);
+            }
+        };
+        fetchSettings();
+    }, [t]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,7 +41,7 @@ function Contact() {
         e.preventDefault();
         setFormStatus({ submitting: true, success: false, error: false });
 
-        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mgvnqwep'; // ← ضع رابطك هنا
+        const FORMSPREE_ENDPOINT = settings.formspreeUrl || 'https://formspree.io/f/mgvnqwep';
 
         try {
             const response = await fetch(FORMSPREE_ENDPOINT, {
@@ -42,21 +65,28 @@ function Contact() {
         }
     };
 
+    // دالة لتحديد الموقع بناءً على اللغة
+    const getLocation = () => {
+        const lang = i18n.language;
+        return settings[`location_${lang}`] || t('contact_location');
+    };
+
+    const contactData = [
+        { icon: Mail, key: 'email', value: settings.email || t('contact_email'), color: 'text-cyan-400' },
+        { icon: Phone, key: 'phone', value: settings.phone || t('contact_phone'), color: 'text-green-400' },
+        // سحب قيمة الموقع المترجمة
+        { icon: MapPin, key: 'location', value: getLocation(), color: 'text-purple-400' },
+    ];
+
+    const socialLinks = [
+        { icon: Github, link: settings.github || '#', color: 'bg-gray-800/50 hover:bg-gray-700 hover:text-white' },
+        { icon: Linkedin, link: settings.linkedin || '#', color: 'bg-gray-800/50 hover:bg-blue-600 hover:text-white' },
+        { icon: Twitter, link: settings.twitter || '#', color: 'bg-gray-800/50 hover:bg-cyan-500 hover:text-white' },
+    ];
+
+
     return (
-        <section id="contact" className="min-h-screen py-20 bg-black relative overflow-hidden">
-            {/* خلفية متحركة */}
-            <div className="absolute inset-0">
-                <motion.div
-                    className="absolute top-0 left-0 w-96 h-96 bg-cyan-400/10 rounded-full filter blur-3xl"
-                    animate={{ x: [0, 100, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                    className="absolute bottom-0 right-0 w-96 h-96 bg-green-400/10 rounded-full filter blur-3xl"
-                    animate={{ x: [0, -100, 0], y: [0, -50, 0], scale: [1.2, 1, 1.2] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                />
-            </div>
+        <section id="contact" className="min-h-screen py-20 bg-transparent relative overflow-hidden">
 
             <div className="container mx-auto px-4 relative z-10">
                 {/* العنوان */}
@@ -87,48 +117,41 @@ function Contact() {
                     {/* معلومات التواصل */}
                     <motion.div
                         className="lg:col-span-2"
-                        initial={{ opacity: 0, x: -30 }}
+                        initial={{ opacity: 0, x: isRtl ? 30 : -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
                     >
                         <div className="h-full flex flex-col gap-6">
                             {/* معلومات الاتصال */}
-                            <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-800 hover:border-cyan-400/50 transition-all duration-300">
+                            <div className="gradient-border-card p-8 rounded-2xl">
                                 <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                                     <MessageSquare className="w-6 h-6 text-cyan-400" />
                                     {t('contact_info_title')}
                                 </h3>
 
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4 text-gray-300">
-                                        <Mail className="text-cyan-400 w-6 h-6" />
-                                        <span dir="ltr">{t('contact_email')}</span>
-                                    </div>
-                                    <div className="flex items-center gap-4 text-gray-300">
-                                        <Phone className="text-green-400 w-6 h-6" />
-                                        <span dir="ltr">{t('contact_phone')}</span>
-                                    </div>
-                                    <div className="flex items-center gap-4 text-gray-300">
-                                        <MapPin className="text-purple-400 w-6 h-6" />
-                                        <span>{t('contact_location')}</span>
-                                    </div>
+                                    {contactData.map((item) => (
+                                        <div key={item.key} className={`flex items-center gap-4 text-gray-300 ${isRtl ? 'justify-end' : 'justify-start'}`}>
+                                            <span dir={item.key === 'phone' || item.key === 'email' ? 'ltr' : 'auto'}>{item.value}</span>
+                                            <item.icon className={`${item.color} w-6 h-6`} />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
                             {/* روابط التواصل */}
-                            <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-800 hover:border-green-400/50 transition-all duration-300">
+                            <div className="gradient-border-card p-8 rounded-2xl">
                                 <h4 className="text-lg font-semibold text-white mb-4">{t('contact_follow')}</h4>
-                                <div className="flex gap-3">
-                                    <a href="#" className="p-4 bg-gray-800 rounded-xl text-gray-400 hover:bg-gray-700 hover:text-white transition-all">
-                                        <Github className="w-6 h-6" />
-                                    </a>
-                                    <a href="#" className="p-4 bg-gray-800 rounded-xl text-gray-400 hover:bg-blue-600 hover:text-white transition-all">
-                                        <Linkedin className="w-6 h-6" />
-                                    </a>
-                                    <a href="#" className="p-4 bg-gray-800 rounded-xl text-gray-400 hover:bg-cyan-500 hover:text-white transition-all">
-                                        <Twitter className="w-6 h-6" />
-                                    </a>
+                                <div className={`flex gap-3 ${isRtl ? 'justify-end' : 'justify-start'}`}>
+                                    {socialLinks.map((item, index) => {
+                                        const IconComponent = item.icon;
+                                        return (
+                                            <a key={index} href={item.link} target="_blank" rel="noopener noreferrer" className={`p-4 rounded-xl text-gray-400 transition-all duration-300 ${item.color}`}>
+                                                <IconComponent className="w-6 h-6" />
+                                            </a>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -137,12 +160,12 @@ function Contact() {
                     {/* نموذج التواصل */}
                     <motion.div
                         className="lg:col-span-3"
-                        initial={{ opacity: 0, x: 30 }}
+                        initial={{ opacity: 0, x: isRtl ? -30 : 30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
                     >
-                        <div className="bg-gradient-to-br from-gray-900/80 to-gray-900/50 backdrop-blur-sm p-8 rounded-2xl border border-gray-800 hover:border-cyan-400/50 transition-all duration-300">
+                        <div className="gradient-border-card p-8 rounded-2xl">
                             {formStatus.success ? (
                                 <motion.div
                                     className="text-center py-16"
@@ -161,9 +184,10 @@ function Contact() {
                                 </motion.div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-6">
+
                                     {/* الاسم */}
                                     <div className="relative">
-                                        <label className="block text-gray-300 mb-2 font-semibold flex items-center gap-2">
+                                        <label className={`block text-gray-300 mb-2 font-semibold flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
                                             <User className="w-4 h-4 text-cyan-400" />
                                             {t('form_name_placeholder')}
                                         </label>
@@ -175,22 +199,15 @@ function Contact() {
                                             onFocus={() => setFocusedField('name')}
                                             onBlur={() => setFocusedField(null)}
                                             required
-                                            className="w-full px-4 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-400 transition-all duration-300 placeholder-gray-500"
+                                            dir={isRtl ? 'rtl' : 'ltr'}
+                                            className={`w-full px-4 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:border-cyan-400 transition-all duration-300 placeholder-gray-500`}
                                             placeholder={t('form_name_placeholder')}
                                         />
-                                        {focusedField === 'name' && (
-                                            <motion.div
-                                                className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyan-400 to-green-400 rounded-full"
-                                                initial={{ width: 0 }}
-                                                animate={{ width: '100%' }}
-                                                transition={{ duration: 0.3 }}
-                                            />
-                                        )}
                                     </div>
 
                                     {/* البريد */}
                                     <div className="relative">
-                                        <label className="block text-gray-300 mb-2 font-semibold flex items-center gap-2">
+                                        <label className={`block text-gray-300 mb-2 font-semibold flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
                                             <AtSign className="w-4 h-4 text-green-400" />
                                             {t('form_email_placeholder')}
                                         </label>
@@ -202,14 +219,15 @@ function Contact() {
                                             onFocus={() => setFocusedField('email')}
                                             onBlur={() => setFocusedField(null)}
                                             required
-                                            className="w-full px-4 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:border-green-400 transition-all duration-300 placeholder-gray-500"
+                                            dir="ltr"
+                                            className={`w-full px-4 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:border-green-400 transition-all duration-300 placeholder-gray-500`}
                                             placeholder={t('form_email_placeholder')}
                                         />
                                     </div>
 
                                     {/* الرسالة */}
                                     <div className="relative">
-                                        <label className="block text-gray-300 mb-2 font-semibold flex items-center gap-2">
+                                        <label className={`block text-gray-300 mb-2 font-semibold flex items-center gap-2 ${isRtl ? 'flex-row-reverse' : 'flex-row'}`}>
                                             <MessageSquare className="w-4 h-4 text-purple-400" />
                                             {t('form_message_placeholder')}
                                         </label>
@@ -221,7 +239,8 @@ function Contact() {
                                             onFocus={() => setFocusedField('message')}
                                             onBlur={() => setFocusedField(null)}
                                             required
-                                            className="w-full px-4 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-all duration-300 placeholder-gray-500 resize-none"
+                                            dir={isRtl ? 'rtl' : 'ltr'}
+                                            className={`w-full px-4 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-all duration-300 placeholder-gray-500 resize-none`}
                                             placeholder={t('form_message_placeholder')}
                                         ></textarea>
                                     </div>

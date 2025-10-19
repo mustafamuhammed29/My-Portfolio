@@ -2,26 +2,22 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { db } from '../firebaseConfig'; // استيراد قاعدة البيانات
+import { db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
+import { Briefcase, Users, Zap, CheckCircle } from 'lucide-react';
 
 function About() {
     const { t, i18n } = useTranslation();
-    const [data, setData] = useState({
-        desc_ar: t('about_desc'),
-        projects: '50', clients: '30', experience: '3', commitment: '100%'
-    });
+    const [data, setData] = useState({});
     const [loading, setLoading] = useState(true);
 
-    // تحميل البيانات من Firestore
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const docRef = doc(db, "settings", "portfolioAbout");
                 const docSnap = await getDoc(docRef);
-
                 if (docSnap.exists()) {
-                    setData(prevData => ({ ...prevData, ...docSnap.data() }));
+                    setData(docSnap.data());
                 }
             } catch (error) {
                 console.error("Error fetching About data:", error);
@@ -34,60 +30,69 @@ function About() {
 
     const getLocalizedDesc = () => {
         const lang = i18n.language;
-        if (lang === 'ar') return data.desc_ar || t('about_desc');
-        if (lang === 'en') return data.desc_en || t('about_desc');
-        if (lang === 'de') return data.desc_de || t('about_desc');
-        return t('about_desc');
+        return data[`desc_${lang}`] || t('about_desc');
     };
 
+    const stats = [
+        { icon: Briefcase, value: data.projects, labelKey: 'stat_projects', color: 'text-cyan-400' },
+        { icon: Users, value: data.clients, labelKey: 'stat_clients', color: 'text-green-400' },
+        { icon: Zap, value: data.experience, labelKey: 'stat_experience', color: 'text-yellow-400' },
+        { icon: CheckCircle, value: data.commitment, labelKey: 'stat_commitment', color: 'text-purple-400' }
+    ];
+
     return (
-        <section id="about" className="relative py-24 min-h-screen overflow-hidden">
-
-            {/* الخلفية: النقاط المتحركة */}
-            <div className="absolute inset-0 overflow-hidden">
-                {[...Array(50)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-cyan-400 rounded-full"
-                        style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-                        animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
-                        transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 2 }}
-                    />
-                ))}
-            </div>
-
+        // تم تعديل الإزاحة وإزالة min-h-screen لفصل الأقسام بشكل أفضل
+        <section id="about" className="relative py-24 sm:py-32 overflow-hidden bg-transparent text-white">
             <div className="container mx-auto px-6 relative z-10 text-center">
-                <h2 className="text-4xl font-bold mb-12 text-white">{t('about_title')}</h2>
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4">{t('about_title')}</h2>
+                    <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-green-400 mx-auto rounded-full mb-12"></div>
+                </motion.div>
 
-                <p className="text-lg leading-relaxed text-gray-400 max-w-3xl mx-auto mb-16">
+                <motion.p
+                    className="text-lg leading-relaxed text-gray-400 max-w-3xl mx-auto mb-16"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                >
                     {loading ? t('about_desc') : getLocalizedDesc()}
-                </p>
+                </motion.p>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-                    <div className="gradient-border-card p-6 flex flex-col items-center justify-center">
-                        <i className="fa-solid fa-rocket text-4xl text-[#00f0ff] mb-4"></i>
-                        <h3 className="text-3xl font-bold mb-1">+{loading ? '...' : data.projects}</h3>
-                        <p className="text-gray-400">{t('stat_projects')}</p>
-                    </div>
-                    <div className="gradient-border-card p-6 flex flex-col items-center justify-center">
-                        <i className="fa-solid fa-users text-4xl text-[#00f0ff] mb-4"></i>
-                        <h3 className="text-3xl font-bold mb-1">+{loading ? '...' : data.clients}</h3>
-                        <p className="text-gray-400">{t('stat_clients')}</p>
-                    </div>
-                    <div className="gradient-border-card p-6 flex flex-col items-center justify-center">
-                        <i className="fa-solid fa-award text-4xl text-[#00f0ff] mb-4"></i>
-                        <h3 className="text-3xl font-bold mb-1">+{loading ? '...' : data.experience}</h3>
-                        <p className="text-gray-400">{t('stat_experience')}</p>
-                    </div>
-                    <div className="gradient-border-card p-6 flex flex-col items-center justify-center">
-                        <i className="fa-solid fa-check-double text-4xl text-[#00f0ff] mb-4"></i>
-                        <h3 className="text-3xl font-bold mb-1">{loading ? '...' : data.commitment}%</h3>
-                        <p className="text-gray-400">{t('stat_commitment')}</p>
-                    </div>
-                </div>
+                <motion.div
+                    className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ staggerChildren: 0.2 }}
+                >
+                    {stats.map((stat, index) => (
+                        <motion.div
+                            key={index}
+                            className="gradient-border-card p-6 flex flex-col items-center justify-center gap-2"
+                            variants={{
+                                hidden: { opacity: 0, y: 20 },
+                                visible: { opacity: 1, y: 0 }
+                            }}
+                        >
+                            <stat.icon className={`w-10 h-10 ${stat.color} mb-2`} />
+                            <h3 className="text-3xl font-bold">
+                                {loading ? '...' : stat.value}
+                                {index < 3 ? '+' : '%'}
+                            </h3>
+                            <p className="text-gray-400">{t(stat.labelKey)}</p>
+                        </motion.div>
+                    ))}
+                </motion.div>
             </div>
         </section>
     );
 }
 
 export default About;
+

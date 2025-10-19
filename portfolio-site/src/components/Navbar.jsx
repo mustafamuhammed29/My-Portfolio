@@ -86,8 +86,8 @@ const Navbar = () => {
                                 key={item.id}
                                 onClick={() => scrollToSection(item.id)}
                                 className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${activeSection === item.id
-                                        ? 'text-cyan-400 bg-cyan-400/10'
-                                        : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+                                    ? 'text-cyan-400 bg-cyan-400/10'
+                                    : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
                                     }`}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -159,8 +159,8 @@ const Navbar = () => {
                                         key={item.id}
                                         onClick={() => scrollToSection(item.id)}
                                         className={`w-full text-right px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${activeSection === item.id
-                                                ? 'text-cyan-400 bg-cyan-400/10'
-                                                : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
+                                            ? 'text-cyan-400 bg-cyan-400/10'
+                                            : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
                                             }`}
                                         initial={{ x: -20, opacity: 0 }}
                                         animate={{ x: 0, opacity: 1 }}

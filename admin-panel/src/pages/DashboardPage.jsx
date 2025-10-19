@@ -3,30 +3,38 @@ import { useState } from 'react';
 import { auth } from '../firebaseConfig';
 import { signOut } from "firebase/auth";
 import ProjectManager from '../components/ProjectManager';
-import AboutManager from '../components/AboutManager'; // استيراد المكون الجديد
+import AboutManager from '../components/AboutManager';
+import SkillsManager from '../components/SkillsManager';
+import ExperienceManager from '../components/ExperienceManager';
+import GeneralSettingsManager from '../components/GeneralSettingsManager';
+// 1. استيراد المكون الجديد
+import HeaderManager from '../components/HeaderManager';
 
 function DashboardPage() {
-    const [activeTab, setActiveTab] = useState('projects'); // الحالة لتحديد علامة التبويب النشطة
+    // 2. جعل "إدارة الواجهة" هي علامة التبويب الافتراضية
+    const [activeTab, setActiveTab] = useState('header');
 
     const handleLogout = () => {
         signOut(auth).catch(error => console.error("Logout failed:", error));
     };
 
+    // 3. إضافة المكون الجديد إلى دالة العرض
     const renderContent = () => {
         switch (activeTab) {
-            case 'projects':
-                return <ProjectManager />;
-            case 'about':
-                return <AboutManager />;
-            default:
-                return <ProjectManager />;
+            case 'header': return <HeaderManager />;
+            case 'projects': return <ProjectManager />;
+            case 'about': return <AboutManager />;
+            case 'skills': return <SkillsManager />;
+            case 'experience': return <ExperienceManager />;
+            case 'settings': return <GeneralSettingsManager />;
+            default: return <HeaderManager />;
         }
     };
 
     const getTabClass = (tabName) => {
         return `px-4 py-2 font-bold transition-colors border-b-2 ${activeTab === tabName
-                ? 'border-cyan-500 text-cyan-400'
-                : 'border-transparent text-gray-400 hover:text-white'
+            ? 'border-cyan-500 text-cyan-400'
+            : 'border-transparent text-gray-400 hover:text-white'
             }`;
     };
 
@@ -44,17 +52,27 @@ function DashboardPage() {
                 </div>
             </nav>
             <main className="container mx-auto p-6">
-                {/* أزرار علامات التبويب */}
-                <div className="flex border-b border-gray-700 mb-8">
+                <div className="flex border-b border-gray-700 mb-8 overflow-x-auto whitespace-nowrap">
+                    {/* 4. إضافة زر التبويب الجديد */}
+                    <button onClick={() => setActiveTab('header')} className={getTabClass('header')}>
+                        إدارة الواجهة
+                    </button>
                     <button onClick={() => setActiveTab('projects')} className={getTabClass('projects')}>
                         إدارة المشاريع
                     </button>
                     <button onClick={() => setActiveTab('about')} className={getTabClass('about')}>
                         إدارة من أنا
                     </button>
+                    <button onClick={() => setActiveTab('skills')} className={getTabClass('skills')}>
+                        إدارة المهارات
+                    </button>
+                    <button onClick={() => setActiveTab('experience')} className={getTabClass('experience')}>
+                        إدارة الخبرات
+                    </button>
+                    <button onClick={() => setActiveTab('settings')} className={getTabClass('settings')}>
+                        الإعدادات العامة
+                    </button>
                 </div>
-
-                {/* عرض المحتوى النشط */}
                 {renderContent()}
             </main>
         </div>
@@ -62,3 +80,4 @@ function DashboardPage() {
 }
 
 export default DashboardPage;
+
