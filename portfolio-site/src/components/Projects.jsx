@@ -5,6 +5,7 @@ import { db } from '../firebaseConfig';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, Github, Smartphone, Globe } from 'lucide-react';
+import ProjectCardSkeleton from './ProjectCardSkeleton';
 
 const Projects = () => {
     const { t, i18n } = useTranslation();
@@ -46,7 +47,7 @@ const Projects = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                     {loading ? (
-                        <p className="text-gray-400 col-span-full text-center">{t('projects_loading')}</p>
+                        [...Array(3)].map((_, i) => <ProjectCardSkeleton key={i} />)
                     ) : projects.length === 0 ? (
                         <p className="text-gray-400 col-span-full text-center">{t('projects_empty')}</p>
                     ) : (

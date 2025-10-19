@@ -2,18 +2,18 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// هام جداً: قم باستبدال هذا الكائن بمعلومات Firebase الخاصة بمشروعك
+// قراءة المتغيرات من البيئة
+// Vite exposes environment variables on the special import.meta.env object.
 const firebaseConfig = {
-    apiKey: "AIzaSyDkqFOI2FzXGkZal3BaIQ-VhFb3GfTDn4Y",
-    authDomain: "my-portfolio-app-5b70f.firebaseapp.com",
-    projectId: "my-portfolio-app-5b70f",
-    storageBucket: "my-portfolio-app-5b70f.firebasestorage.app",
-    messagingSenderId: "150685946551",
-    appId: "1:150685946551:web:761c8a2506b71b70d5b332"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 // تهيئة Firebase
 const app = initializeApp(firebaseConfig);
 
 // تصدير قاعدة البيانات لاستخدامها في المكونات الأخرى
 export const db = getFirestore(app);
-
