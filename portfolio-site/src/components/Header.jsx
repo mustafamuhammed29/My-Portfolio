@@ -45,7 +45,8 @@ const Header = () => {
     };
 
     if (loading) {
-        return <header id="home" className="relative min-h-screen flex justify-center items-center"></header>; // عرض شاشة تحميل بسيطة
+        // عرض شاشة تحميل بسيطة فارغة للحفاظ على التخطيط
+        return <header id="home" className="relative min-h-screen"></header>;
     }
 
     return (
@@ -60,6 +61,7 @@ const Header = () => {
                         style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
                         animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
                         transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 2 }}
+                        
                     />
                 ))}
             </div>
@@ -74,19 +76,16 @@ const Header = () => {
                         <i className="fa-solid fa-code text-3xl text-[#00f0ff]"></i>
                     </div>
                 </div>
-
+                       
                 <motion.h1
-                    className="text-5xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#00f0ff] to-[#58a6ff] leading-snug md:leading-[1.6]"
-                    style={{ WebkitBackgroundClip: "text" }}
-                    initial={{ opacity: 0, scale: 1 }}
+                    className="text-5xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#00f0ff] to-[#58a6ff]"
+                    initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
+                    
                 >
-                    {t('hero_title')}
-                    <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-green-400 mx-auto rounded-full"></div>
-
+                    {headerData.title}
                 </motion.h1>
-
 
                 <motion.p
                     className="font-mono text-lg md:text-xl text-gray-400 mb-6"
