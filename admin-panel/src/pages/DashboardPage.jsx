@@ -8,7 +8,9 @@ import SkillsManager from '../components/SkillsManager';
 import ExperienceManager from '../components/ExperienceManager';
 import GeneralSettingsManager from '../components/GeneralSettingsManager';
 import HeaderManager from '../components/HeaderManager';
-import NavbarManager from '../components/NavbarManager';
+import NavbarManager from '../components/NavbarManager.jsx';
+import SeoManager from '../components/SeoManager.jsx';
+import PreloaderManager from '../components/PreloaderManager.jsx';
 
 function DashboardPage() {
     const [activeTab, setActiveTab] = useState('header');
@@ -21,11 +23,13 @@ function DashboardPage() {
         switch (activeTab) {
             case 'header': return <HeaderManager />;
             case 'navbar': return <NavbarManager />;
+            case 'preloader': return <PreloaderManager />;
             case 'projects': return <ProjectManager />;
             case 'about': return <AboutManager />;
             case 'skills': return <SkillsManager />;
             case 'experience': return <ExperienceManager />;
             case 'settings': return <GeneralSettingsManager />;
+            case 'seo': return <SeoManager />;
             default: return <HeaderManager />;
         }
     };
@@ -58,6 +62,9 @@ function DashboardPage() {
                     <button onClick={() => setActiveTab('navbar')} className={getTabClass('navbar')}>
                         إدارة شريط التنقل
                     </button>
+                    <button onClick={() => setActiveTab('preloader')} className={getTabClass('preloader')}>
+                        شاشة التحميل
+                    </button>
                     <button onClick={() => setActiveTab('projects')} className={getTabClass('projects')}>
                         إدارة المشاريع
                     </button>
@@ -72,6 +79,9 @@ function DashboardPage() {
                     </button>
                     <button onClick={() => setActiveTab('settings')} className={getTabClass('settings')}>
                         الإعدادات العامة
+                    </button>
+                    <button onClick={() => setActiveTab('seo')} className={getTabClass('seo')}>
+                        SEO
                     </button>
                 </div>
                 {renderContent()}

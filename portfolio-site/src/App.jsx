@@ -15,6 +15,8 @@ import Footer from './components/Footer';
 import ExplosionAnimation from './components/ExplosionAnimation';
 import StarfieldBackground from './components/StarfieldBackground';
 import MaintenancePage from './components/MaintenancePage';
+import Preloader from './components/Preloader';
+import BackToTopButton from './components/BackToTopButton';
 
 function App() {
   const { i18n } = useTranslation();
@@ -57,7 +59,8 @@ function App() {
       } catch (error) {
         console.error("Error fetching settings:", error);
       } finally {
-        setLoadingSettings(false);
+        // إضافة تأخير بسيط لإظهار شاشة التحميل بشكل أفضل
+        setTimeout(() => setLoadingSettings(false), 1500);
       }
     };
     fetchSettings();
@@ -73,7 +76,7 @@ function App() {
 
   // Initial loading screen to prevent content flash
   if (loadingSettings) {
-    return <div className="bg-black min-h-screen"></div>;
+    return <Preloader />;
   }
 
   // Display maintenance page if activated
@@ -95,7 +98,7 @@ function App() {
         <Navbar />
         <main>
           <Header />
-          <Suspense fallback={<div className="text-white text-center p-10">Loading Section...</div>}>
+          <Suspense fallback={<div className="min-h-screen"></div>}>
             {settings.showAbout && <About />}
             {settings.showExperience && <Experience />}
             {settings.showSkills && <Skills />}
@@ -105,6 +108,7 @@ function App() {
           </Suspense>
         </main>
         <Footer />
+        <BackToTopButton />
       </div>
     </>
   );
