@@ -7,21 +7,20 @@ import AboutManager from '../components/AboutManager';
 import SkillsManager from '../components/SkillsManager';
 import ExperienceManager from '../components/ExperienceManager';
 import GeneralSettingsManager from '../components/GeneralSettingsManager';
-// 1. استيراد المكون الجديد
 import HeaderManager from '../components/HeaderManager';
+import NavbarManager from '../components/NavbarManager';
 
 function DashboardPage() {
-    // 2. جعل "إدارة الواجهة" هي علامة التبويب الافتراضية
     const [activeTab, setActiveTab] = useState('header');
 
     const handleLogout = () => {
         signOut(auth).catch(error => console.error("Logout failed:", error));
     };
 
-    // 3. إضافة المكون الجديد إلى دالة العرض
     const renderContent = () => {
         switch (activeTab) {
             case 'header': return <HeaderManager />;
+            case 'navbar': return <NavbarManager />;
             case 'projects': return <ProjectManager />;
             case 'about': return <AboutManager />;
             case 'skills': return <SkillsManager />;
@@ -53,9 +52,11 @@ function DashboardPage() {
             </nav>
             <main className="container mx-auto p-6">
                 <div className="flex border-b border-gray-700 mb-8 overflow-x-auto whitespace-nowrap">
-                    {/* 4. إضافة زر التبويب الجديد */}
                     <button onClick={() => setActiveTab('header')} className={getTabClass('header')}>
                         إدارة الواجهة
+                    </button>
+                    <button onClick={() => setActiveTab('navbar')} className={getTabClass('navbar')}>
+                        إدارة شريط التنقل
                     </button>
                     <button onClick={() => setActiveTab('projects')} className={getTabClass('projects')}>
                         إدارة المشاريع

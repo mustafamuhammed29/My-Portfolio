@@ -3,20 +3,62 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { db } from '../firebaseConfig.js';
+import { doc, getDoc } from 'firebase/firestore';
 
 const Navbar = () => {
     const { t, i18n } = useTranslation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('home');
+    const [navConfig, setNavConfig] = useState(null);
 
-    const navItems = [
-        { id: 'home', label: t('nav_home') },
-        { id: 'about', label: t('nav_about') },
-        { id: 'skills', label: t('nav_skills') },
-        { id: 'projects', label: t('nav_projects') },
-        { id: 'contact', label: t('nav_contact') },
-    ];
+    useEffect(() => {
+        const fetchNavConfig = async () => {
+            try {
+                const docRef = doc(db, "settings", "navbarContent");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setNavConfig(docSnap.data());
+                } else {
+                    // Fallback config if document doesn't exist
+                    setNavConfig({
+                        showHome: true, showAbout: true, showExperience: true, showSkills: true, showProjects: true, showPlanner: true, showContact: true
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching navbar config:", error);
+                // Fallback config on error
+                setNavConfig({
+                    showHome: true, showAbout: true, showExperience: true, showSkills: true, showProjects: true, showPlanner: true, showContact: true
+                });
+            }
+        };
+        fetchNavConfig();
+    }, []);
+
+    const generateNavItems = () => {
+        if (!navConfig) return [];
+
+        const allNavItems = [
+            { id: 'home', key: 'home', visible: navConfig.showHome },
+            { id: 'about', key: 'about', visible: navConfig.showAbout },
+            { id: 'experience', key: 'experience', visible: navConfig.showExperience },
+            { id: 'skills', key: 'skills', visible: navConfig.showSkills },
+            { id: 'projects', key: 'projects', visible: navConfig.showProjects },
+            { id: 'idea-generator', key: 'planner', visible: navConfig.showPlanner },
+            { id: 'contact', key: 'contact', visible: navConfig.showContact },
+        ];
+
+        return allNavItems
+            .filter(item => item.visible)
+            .map(item => ({
+                id: item.id,
+                label: navConfig[`label_${item.key}_${i18n.language}`] || t(`nav_${item.key}`)
+            }));
+    };
+
+    const navItems = generateNavItems();
 
     const changeLanguage = (lng) => {
         i18n.changeLanguage(lng);
@@ -32,18 +74,19 @@ const Navbar = () => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50);
 
-            // تحديد القسم النشط
             const sections = navItems.map(item => item.id);
-            for (const section of sections) {
-                const element = document.getElementById(section);
+            let currentSection = 'home';
+            for (const sectionId of sections) {
+                const element = document.getElementById(sectionId);
                 if (element) {
                     const rect = element.getBoundingClientRect();
                     if (rect.top <= 100 && rect.bottom >= 100) {
-                        setActiveSection(section);
+                        currentSection = sectionId;
                         break;
                     }
                 }
             }
+            setActiveSection(currentSection);
         };
 
         window.addEventListener('scroll', handleScroll);
@@ -58,6 +101,12 @@ const Navbar = () => {
         }
     };
 
+    // Render a placeholder while config is loading
+    if (!navConfig) {
+        return <nav className="fixed top-0 left-0 right-0 z-50 h-[72px] bg-transparent"></nav>;
+    }
+
+
     return (
         <>
             <motion.nav
@@ -68,18 +117,17 @@ const Navbar = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                    {/* الشعار */}
                     <motion.a
                         href="#home"
+                        onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}
                         className="text-2xl font-bold text-white flex items-center gap-2"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        <i className="fa-solid fa-layer-group text-[#00f0ff]"></i>
-                        {t('portfolio_title')}
+                        <i className={`${navConfig.logoIconClass || 'fa-solid fa-layer-group'} text-[#00f0ff]`}></i>
+                        {navConfig[`logoText_${i18n.language}`] || t('portfolio_title')}
                     </motion.a>
 
-                    {/* القائمة - سطح المكتب */}
                     <div className="hidden md:flex items-center gap-8">
                         {navItems.map(item => (
                             <motion.button
@@ -96,7 +144,6 @@ const Navbar = () => {
                             </motion.button>
                         ))}
 
-                        {/* أزرار اللغات */}
                         <div className="flex items-center gap-2 border-l border-gray-700 pl-6">
                             <button
                                 onClick={() => changeLanguage('en')}
@@ -119,7 +166,6 @@ const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* زر القائمة - الموبايل */}
                     <motion.button
                         className="md:hidden p-2 text-white"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -130,7 +176,6 @@ const Navbar = () => {
                 </div>
             </motion.nav>
 
-            {/* القائمة المنسدلة - الموبايل */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div
@@ -139,13 +184,11 @@ const Navbar = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        {/* الخلفية */}
-                        <motion.div
+                        <div
                             className="absolute inset-0 bg-black/95 backdrop-blur-lg"
                             onClick={() => setIsMobileMenuOpen(false)}
                         />
 
-                        {/* القائمة */}
                         <motion.div
                             className="absolute top-16 left-0 right-0 bg-gray-900/95 backdrop-blur-lg border-b border-gray-800 shadow-2xl"
                             initial={{ y: -20, opacity: 0 }}
@@ -170,7 +213,6 @@ const Navbar = () => {
                                     </motion.button>
                                 ))}
 
-                                {/* أزرار اللغات */}
                                 <div className="flex items-center gap-2 mt-4 border-t border-gray-700 pt-4">
                                     <button
                                         onClick={() => changeLanguage('en')}
@@ -201,3 +243,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+

@@ -10,12 +10,9 @@ function GeneralSettingsManager() {
         // القيم الافتراضية لجميع الحقول
         maintenanceMode: false,
         defaultLang: 'ar',
-
         email: '', phone: '', location_ar: '', location_en: '', location_de: '',
         github: '', linkedin: '', twitter: '', formspreeUrl: '',
         footer_ar: '', footer_en: '', footer_de: '',
-        showAbout: true, showExperience: true, showSkills: true,
-        showProjects: true, showPlanner: true, showContact: true,
     });
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -101,26 +98,6 @@ function GeneralSettingsManager() {
                     </div>
                 </div>
 
-                {/* قسم ظهور الأقسام */}
-                <div>
-                    <h4 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">إظهار / إخفاء الأقسام</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {Object.keys(settings).filter(k => k.startsWith('show')).map(key => (
-                            <label key={key} htmlFor={key} className="flex items-center gap-2 bg-gray-700 p-3 rounded-lg">
-                                <input
-                                    type="checkbox"
-                                    id={key}
-                                    name={key}
-                                    checked={settings[key]}
-                                    onChange={handleCheckboxChange}
-                                    className="w-5 h-5 text-cyan-500 bg-gray-600 border-gray-500 rounded focus:ring-cyan-600"
-                                />
-                                <span className="text-white">{key.replace('show', '')}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
                 {/* معلومات التواصل */}
                 <div>
                     <h4 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">معلومات التواصل</h4>
@@ -165,3 +142,4 @@ function GeneralSettingsManager() {
 }
 
 export default GeneralSettingsManager;
+
